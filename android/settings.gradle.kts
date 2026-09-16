@@ -28,7 +28,6 @@ pluginManagement {
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
 
-    // Flutter currently requires AGP 8.11.1 or newer.
     id("com.android.application") version "8.11.1" apply false
 
     id("org.jetbrains.kotlin.android") version "2.1.10" apply false
