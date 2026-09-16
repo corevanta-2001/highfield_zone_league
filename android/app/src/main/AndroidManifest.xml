@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="Core-Vanta"
+        android:label="HZL"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/league_logo">
         <activity
             android:name=".MainActivity"
             android:exported="true"
