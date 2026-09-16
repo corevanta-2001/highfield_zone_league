@@ -7,8 +7,6 @@ plugins {
 android {
     namespace = "com.example.highfield_zone_league"
 
-    // Compile against Android API 36.
-    // This is separate from targetSdk and minSdk.
     compileSdk = 36
 
     defaultConfig {
@@ -32,8 +30,6 @@ android {
 
     buildTypes {
         release {
-            // Uses debug signing so an APK can be produced immediately.
-            // Replace with your release keystore when publishing.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
