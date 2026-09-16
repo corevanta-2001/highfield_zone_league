@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.highfield_zone_league
+    namespace = "com.example.highfield_zone_league"
     compileSdk = 36 
     ndkVersion = flutter.ndkVersion
 
