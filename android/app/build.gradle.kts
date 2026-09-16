@@ -1,46 +1,43 @@
 plugins {
-        id("com.android.application")
-            id("org.jetbrains.kotlin.android")
-                // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-                    id("dev.flutter.flutter-gradle-plugin")
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
-        namespace =com.android.highfield_zone_league"
-            compileSdk = 36 
-                ndkVersion = flutter.ndkVersion
+    namespace = "com.example.highfield_zone_league
+    compileSdk = 36 
+    ndkVersion = flutter.ndkVersion
 
-                    compileOptions {
-                                sourceCompatibility = JavaVersion.VERSION_17
-                                        targetCompatibility = JavaVersion.VERSION_17
-                    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 
-                        defaultConfig {
-                                    applicationId = "com.example.exam_hook"
-                                            minSdk = flutter.minSdkVersion
-                                                    targetSdk = flutter.targetSdkVersion
-                                                            versionCode = flutter.versionCode
-                                                                    versionName = flutter.versionName
-                        }
+    defaultConfig {
+        applicationId = "com.example.highfield_zone_league"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
 
-                            buildTypes {
-                                        release {
-                                                        signingConfig = signingConfigs.getByName("debug")
-                                                                    isMinifyEnabled = false  // <-- ADD THIS
-                                                                                isShrinkResources = false // <-- ADD THIS
-                                        }
-                            }
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false  // <-- ADD THIS
+            isShrinkResources = false // <-- ADD THIS
+        }
+    }
 }
 
 kotlin {
-        compilerOptions {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
 }
 
 flutter {
-        source = "../.."
-}
-                                        }
-                    }
+    source = "../.."
 }
