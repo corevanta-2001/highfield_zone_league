@@ -19,18 +19,6 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// FORCE all plugins to compile against 36
-subprojects {
-    afterEvaluate {
-        if (project.hasProperty("android")) {
-            val androidExtension = project.extensions.findByName("android")
-            if (androidExtension is com.android.build.gradle.BaseExtension) {
-                androidExtension.compileSdkVersion(36)
-            }
-        }
-    }
-}
-
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
