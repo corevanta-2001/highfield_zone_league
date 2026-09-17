@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "906294378990",
+    "project_id": "highfields-78e12",
+    "storage_bucket": "highfields-78e12.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:906294378990:android:a7ee3c8d90e3cde5400eff",
+        "android_client_info": {
+          "package_name": "com.example.highfield_zone_league"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtdZlbtD8vHML1JpuM2DP58sjlK0V2MV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
