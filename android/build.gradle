@@ -11,18 +11,6 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     def newSubprojectBuildDir = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
-    
-    // AGP 9 fix: set compileSdk BEFORE it's read
-    plugins.withId("com.android.library") {
-        android {
-            compileSdk 36
-        }
-    }
-    plugins.withId("com.android.application") {
-        android {
-            compileSdk 36
-        }
-    }
 }
 
 tasks.register("clean", Delete) {
