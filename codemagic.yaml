@@ -22,6 +22,6 @@ workflows:
       - name: Build APK
         script: |
           cd $CM_BUILD_DIR
-          flutter build apk --release
+          flutter build apk --debug
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
