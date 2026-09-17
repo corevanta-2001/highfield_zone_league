@@ -16,15 +16,3 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.layout.buildDirectory
 }
-
-gradle.projectsEvaluated {
-    subprojects {
-        plugins.withId("com.android.library") {
-            def libExt = extensions.findByName("android")
-            if (libExt != null && libExt.compileSdk < 36) {
-                libExt.compileSdk = 36
-                println("Forced ${project.name} compileSdk to 36")
-            }
-        }
-    }
-}
