@@ -80,7 +80,29 @@ class _LeagueFixturesScreenState extends State<LeagueFixturesScreen> {
           return matchStatus && (_search.isEmpty || matchSearch);
         }).toList();
 
-        if(filteredDocs.isEmpty) return Center(child: Text('No $status matches', style: TextStyle(color: Colors.grey)));
+        if(filteredDocs.isEmpty) {
+          final bool searching = _search.isNotEmpty;
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: _EmptyStateCard(
+                icon: status == 'Completed'
+                    ? Icons.emoji_events_outlined
+                    : Icons.event_available_outlined,
+                title: searching
+                    ? 'No matching $status matches'
+                    : status == 'Completed'
+                        ? 'No results yet'
+                        : 'No scheduled fixtures',
+                message: searching
+                    ? 'Try another team name or clear the search to see more matches.'
+                    : status == 'Completed'
+                        ? 'Completed fixtures will appear here after results are recorded.'
+                        : 'Scheduled fixtures will appear here when they are added.',
+              ),
+            ),
+          );
+        }
 
         return ListView.builder(
           padding: const EdgeInsets.all(12),
@@ -91,6 +113,75 @@ class _LeagueFixturesScreenState extends State<LeagueFixturesScreen> {
           }
         );
       }
+    );
+  }
+}
+
+class _EmptyStateCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+
+  const _EmptyStateCard({
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF1A237E).withOpacity(0.09),
+              Colors.white,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A237E).withOpacity(0.10),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 38, color: const Color(0xFF1A237E)),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A237E),
+              ),
+            ),
+            const SizedBox(height: 7),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -237,7 +328,19 @@ class _ScorersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if(scorers.isEmpty) return const Text('No goals', style: TextStyle(color: Colors.grey));
+    if(scorers.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Text(
+          'No goals recorded',
+          style: TextStyle(color: Colors.grey, fontSize: 12),
+        ),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: scorers.map((s) => Padding(

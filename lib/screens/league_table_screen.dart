@@ -19,6 +19,19 @@ class LeagueTableScreen extends StatelessWidget {
           if(!snap.hasData) return const Center(child: CircularProgressIndicator());
           var teams = snap.data!.docs;
 
+          if(teams.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: _EmptyStateCard(
+                  icon: Icons.leaderboard_outlined,
+                  title: 'League table is empty',
+                  message: 'The table will appear here when teams are added and results are recorded.',
+                ),
+              ),
+            );
+          }
+
           return Container(
             color: Colors.grey[50],
             child: SingleChildScrollView(
@@ -96,6 +109,75 @@ class LeagueTableScreen extends StatelessWidget {
             ),
           );
         }
+      ),
+    );
+  }
+}
+
+class _EmptyStateCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+
+  const _EmptyStateCard({
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF1A237E).withOpacity(0.09),
+              Colors.white,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A237E).withOpacity(0.10),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 38, color: const Color(0xFF1A237E)),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A237E),
+              ),
+            ),
+            const SizedBox(height: 7),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
