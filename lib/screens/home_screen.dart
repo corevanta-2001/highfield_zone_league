@@ -21,10 +21,25 @@ class _HomeScreenState extends State<HomeScreen> {
   final db = FirebaseFirestore.instance;
   final PageController _pageController = PageController(); // NEW
   Timer? _timer; // NEW
+  Timer? _fixtureExpiryTimer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Refresh the home screen periodically so a fixture is removed
+    // automatically once 120 minutes have passed.
+    _fixtureExpiryTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _fixtureExpiryTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -91,7 +106,13 @@ class _HomeScreenState extends State<HomeScreen> {
             stream: db.collection('teams').orderBy('points', descending: true).limit(4).snapshots(),
             builder: (c, s) {
               if(s.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator()); // BETTER CHECK
-              if(!s.hasData || s.data!.docs.isEmpty) return const Text('No teams yet'); // FALLBACK
+              if(!s.hasData || s.data!.docs.isEmpty) {
+                return const _EmptyStateCard(
+                  icon: Icons.groups_outlined,
+                  title: 'No teams yet',
+                  message: 'League teams will appear here once they are added.',
+                );
+              }
               return Column(
                 children: List.generate(s.data!.docs.length, (i) {
                   var d = s.data!.docs[i].data() as Map<String, dynamic>;
@@ -112,41 +133,81 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 12),
         
-       StreamBuilder(
-  stream: db.collection('fixtures').orderBy('date').limit(5).snapshots(), // REMOVED.where
-  builder: (c, s) {
-    if(s.connectionState == ConnectionState.waiting) {
-      return const SizedBox(height: 180, child: Center(child: CircularProgressIndicator()));
-    }
-    if(!s.hasData || s.data!.docs.isEmpty) {
-      return const SizedBox(
-        height: 180,
-        child: Center(child: Text('No fixtures in DB at all', style: TextStyle(color: Colors.grey))),
-      );
-    }
+        StreamBuilder(
+          stream: db.collection('fixtures').orderBy('date').snapshots(),
+          builder: (c, s) {
+            if(s.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 180,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
 
-    var docs = s.data!.docs;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoSlide(docs.length));
+            if(!s.hasData || s.data!.docs.isEmpty) {
+              WidgetsBinding.instance.addPostFrameCallback((_) => _startAutoSlide(0));
+              return const _EmptyStateCard(
+                icon: Icons.event_available_outlined,
+                title: 'No upcoming fixtures',
+                message: 'Fixtures will appear here when they are scheduled.',
+              );
+            }
 
-    return FadeInUp(
-      delay: const Duration(milliseconds: 1500),
-      child: SizedBox(
-        height: 200,
-        child: PageView.builder(
-          controller: _pageController,
-          itemCount: docs.length,
-          itemBuilder: (context, i) {
-            var d = docs[i];
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: _FixtureHomeCard(data: d.data() as Map<String, dynamic>, docId: d.id),
+            final now = DateTime.now();
+
+            // A fixture remains visible until 120 minutes after its
+            // scheduled date/time. After that it is removed from this card.
+            final docs = s.data!.docs.where((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final rawDate = data['date'];
+
+              if(rawDate is! Timestamp) return false;
+
+              final fixtureDate = rawDate.toDate();
+              final expiryTime = fixtureDate.add(const Duration(minutes: 120));
+
+              return now.isBefore(expiryTime);
+            }).toList();
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_pageController.hasClients && docs.isNotEmpty) {
+                final currentPage = _pageController.page?.round() ?? 0;
+                if (currentPage >= docs.length) {
+                  _pageController.jumpToPage(0);
+                }
+              }
+              _startAutoSlide(docs.length);
+            });
+
+            if(docs.isEmpty) {
+              return const _EmptyStateCard(
+                icon: Icons.event_available_outlined,
+                title: 'No upcoming fixtures',
+                message: 'There are no fixtures currently scheduled to be shown.',
+              );
+            }
+
+            return FadeInUp(
+              delay: const Duration(milliseconds: 1500),
+              child: SizedBox(
+                height: 200,
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: docs.length,
+                  itemBuilder: (context, i) {
+                    var d = docs[i];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: _FixtureHomeCard(
+                        data: d.data() as Map<String, dynamic>,
+                        docId: d.id,
+                      ),
+                    );
+                  },
+                ),
+              ),
             );
-          },
+          }
         ),
-      ),
-    );
-  }
-),
 
 
           const SizedBox(height: 24),
@@ -160,7 +221,13 @@ class _HomeScreenState extends State<HomeScreen> {
             stream: db.collection('players').orderBy('goals', descending: true).limit(5).snapshots(),
             builder: (c, s) {
               if(s.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator()); // BETTER CHECK
-              if(!s.hasData || s.data!.docs.isEmpty) return const Card(child: Padding(padding: EdgeInsets.all(16), child: Text('No goals recorded yet')));
+              if(!s.hasData || s.data!.docs.isEmpty) {
+                return const _EmptyStateCard(
+                  icon: Icons.sports_soccer_outlined,
+                  title: 'No goals recorded yet',
+                  message: 'Top scorers will appear here as goals are recorded.',
+                );
+              }
               return Card(
                 elevation: 3,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -193,6 +260,81 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ListTile _tile(BuildContext c, String t, IconData i, VoidCallback v) =>
     ListTile(leading: Icon(i, color: const Color(0xFF1A237E)), title: Text(t, style: const TextStyle(color: Colors.black)), onTap: v);
+}
+
+class _EmptyStateCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+
+  const _EmptyStateCard({
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF1A237E).withOpacity(0.08),
+              Colors.white,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A237E).withOpacity(0.10),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 34,
+                color: const Color(0xFF1A237E),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A237E),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[600],
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _SectionHeader extends StatelessWidget {
