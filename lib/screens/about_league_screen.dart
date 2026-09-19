@@ -110,7 +110,7 @@ class AboutLeagueScreen extends StatelessWidget {
                         child: Icon(Icons.email_outlined, color: Colors.green),
                       ),
                       title: Text('Contact Admin', style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('admin@hzl.com'),
+                      subtitle: Text('puremundex@gmail.com'),
                       trailing: IconButton(
                         icon: Icon(Icons.copy, size: 20),
                         onPressed: () {
